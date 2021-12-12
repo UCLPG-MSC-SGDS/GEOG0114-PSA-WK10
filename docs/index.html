@@ -11,7 +11,7 @@
 
 
 
-<title>Street Network Analysis in R</title>
+<title>Spatial Network Analysis in R</title>
 
 <script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -265,7 +265,7 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Street Network Analysis in R</h1>
+<h1 class="title toc-ignore">Spatial Network Analysis in R</h1>
 <h4 class="date">Week 10: 13/12/2021</h4>
 
 </div>
@@ -317,8 +317,15 @@ pre code, pre, code {
 </hr>
 <div id="lets-begin" class="section level2">
 <h2><strong>1.1. Let’s begin</strong></h2>
-<p><strong>Background</strong>:</p>
-<p><strong>OBJECTIVES</strong>:</p>
+<p><strong>Background</strong>: Street configuration, transportation &amp; shipping routes, river basins and telecommunication lines etc., are all examples of spatial networks, a spatial network is an organised system or collection of <strong>nodes</strong> and <strong>edges</strong> embedded space. <strong>Nodes</strong> can be a representation of physical objects in geographical space, and <strong>edges</strong> show what connections are formed between the objects. For instance, when we take street segments (i.e., roads, streets, motorways etc.,) and the intersections connecting more than one street segment from an area, a <strong>node</strong> can typically represent the street segment itself while the <strong>edges</strong> represents the intersections that connect the street. Network analysis in particular have many applications, such examples includes social network science (Facebook, Twitter etc.,), infectious and sexually transmitted disease epidemiology for contact tracing and networks, and quantitative criminology particularly for determining gang networks and estimating crime patterns.</p>
+<p><strong>Objectives</strong>: In this tutorial you will be introduced to spatial networks analysis in RStudio in order to determine key measures for centrality: <strong>connectivity</strong>, <strong>shortness path</strong> and <strong>centrality betweeness</strong>. These three measure in particular are key measures for accessibility which are, in this context, risk factors that play a significant role in the occurrence of certain outcomes (e.g., crime). You will learn this in the context of quantitative criminology.</p>
+<p>These are the key tasks:</p>
+<ul>
+<li>Learning how to create a network structure with nodes and edges</li>
+<li>Visualising a network structure</li>
+<li>Estimating the measures for accessibility: <strong>connectivity</strong>, <strong>shortness path</strong> and <strong>centrality betweeness</strong>.</li>
+<li><strong>Application</strong>: how to use these measures in model for evidence-based research for the predicting risk of crime victimisation such as burglaries. This example will be situated in a second-tier city called <code>Badawara-Malali</code>, which is in Nigeria, a sub-Saharan African country <a href="https://www.sciencedirect.com/science/article/abs/pii/S0143622818311949?via%3Dihub">(see Musah <em>et al</em>, 2020)</a>.</li>
+</ul>
 <p></br></p>
 </div>
 <div id="data-sets-setting-up-the-work-directory" class="section level2">
@@ -334,14 +341,85 @@ setwd(&quot;N:/GEOG0114/Week 10&quot;)</code></pre>
 <ul>
 <li><code>sf</code>: Simple Features</li>
 <li><code>tmap</code>: Thematic Mapping</li>
-<li><code>raster</code>: Raster/gridded data analysis and manipulation</li>
-<li><code>sp</code>: Package for providing classes for spatial data (points, lines, polygons and grids)</li>
 </ul>
 <pre class="r"><code># Load packages using library() function
 library(&quot;sf&quot;)
-library(&quot;tmap&quot;)
-library(&quot;raster&quot;)
-library(&quot;sp&quot;)</code></pre>
+library(&quot;tmap&quot;)</code></pre>
+<p>The above packages <code>sf</code> and <code>tmap</code> should have been installed in the previous session(s). However, we will need to install the following new packages:</p>
+<ul>
+<li><code>igraph</code>: provides access to functions for carrying out network analysis.</li>
+<li><code>MASS</code>: provides access to functions for performing further multivariable regression modelling such <code>Negative</code> or <code>Zero-Inflated</code> Poisson regressions</li>
+</ul>
+<pre class="r"><code># Install the packages using the install.package()
+install.packages(&quot;igraph&quot;)
+install.packages(&quot;MASS&quot;)
+
+# Load the packages with library()
+library(&quot;igraph&quot;)
+library(&quot;MASS&quot;)</code></pre>
+<p></br></p>
+</div>
+<div id="loading-the-datasets" class="section level2">
+<h2><strong>1.4. Loading the datasets</strong></h2>
+<p>Let us load the following <strong>spatial data</strong> into R/RStudio:</p>
+<ul>
+<li>Shapefile: Polylines representing streets in a small Nigerian city of Badawara-Malali <code>Badawara-Malali Segments_3857.shp</code></li>
+<li>Shapefile: Points representing street intersections <code>Badawara-Malali Intersections_3857.shp</code></li>
+<li>Shapefile: Points of representing points of Burglaries</li>
+</ul>
+<p>Let use <code>tmap</code> functions to have a visual of the street configuration.</p>
+<pre class="r"><code># plot the line segments and intersections
+tm_shape(segments) + tm_lines() + tm_text(&quot;StreetCode&quot;, size = 0.5, along.lines = TRUE) +
+    tm_shape(points) + tm_dots(size = 0.05, col = &quot;black&quot;, alpha = 0.3) +
+    tm_shape(burglaries) + tm_dots(size = 0.05, col = &quot;red&quot;) +
+    tm_layout(frame = TRUE) +
+    tm_compass(type = &quot;arrow&quot;, position = c(&quot;right&quot;, &quot;top&quot;)) +
+    tm_scale_bar(position = c(&quot;right&quot;, &quot;bottom&quot;))</code></pre>
+<p></br></p>
+<center>
+<img src="Image1_1.png" title="fig:" height="600" alt="“/Volumes/Anwar-HHD/GEOG0114/Computer Labs/Week 10/GEOG0114-PSA-WK10”" />
+</center>
+<p></br></p>
+<p class="comment">
+<strong>What does this figure represent?</strong> The figure shows the <strong>actual</strong> spatial configuration of the street network in the study area of <code>Badawara-Malali</code>. The red points adjacent to street lines represent the locations reported number of times the property experienced a burglary in 2014/7. Each line segment is defined by a unique number e.g., <code>S00075</code> or <code>S00038</code> etc.,. Here, we can see the points of intersections between streets segments denoting which street segments are connected with each other. </br> </br> For instance, we can see that street <code>S00007</code> is actually connected to 6 other street segments i.e., <code>S00004</code>, <code>S00005</code>, <code>S00006</code>, <code>S00008</code>, <code>S00009</code> and <code>S00010</code>. When we check the <code>SpatialPolyLinesDataFrame</code> i.e., <code>segments</code>, it does not tell us this information about the connections, or road intersection etc.,. This is where <strong>Network Analysis</strong> comes in. </br> </br> In Network Analysis, the premise is to transform this into an alternate version comprised of <strong>nodes</strong> and <strong>edges</strong>. In this case, the <strong>nodes</strong> represent the street segments and the <strong>edge</strong> represents the connections or intersections between streets.The format of the data set for Network Analysis are arranged different from that of a point and line shapefile.
+</p>
+<p></br></p>
+<p>Let us load the above spatial street data nodes and edges information:</p>
+<ul>
+<li><code>Street Nodes.csv</code>: This contains the list of unique ID names of the street segments <code>index</code> and its associated unique ID number <code>indexID</code></li>
+<li><code>Street Edges.csv</code>: This contains the list of unique ID names of the street segments <code>index</code>, and what streets they are connected (or linked) to <code>linked_to</code>. So its <code>indexID</code> and street IDs are linked to <code>linkID</code></li>
+</ul>
+<pre class="r"><code># load the nodes and edges
+nodes &lt;- read.csv(file = &quot;Street Nodes.csv&quot;, header = TRUE, sep = &quot;,&quot;)
+edges &lt;- read.csv(file = &quot;Street Edges.csv&quot;, header = TRUE, sep = &quot;,&quot;)
+
+head(nodes)</code></pre>
+<pre><code>##    index indexID
+## 1 S00001       1
+## 2 S00002       2
+## 3 S00003       3
+## 4 S00004       4
+## 5 S00005       5
+## 6 S00006       6</code></pre>
+<pre class="r"><code>head(edges)</code></pre>
+<pre><code>##    index linked_to indexID linkID
+## 1 S00002    S00011       2     11
+## 2 S00002    S00012       2     12
+## 3 S00004    S00007       4      7
+## 4 S00005    S00007       5      7
+## 5 S00005    S00008       5      8
+## 6 S00007    S00004       7      4</code></pre>
+</br>
+<p class="comment">
+<strong>NOTE</strong>: Perusing the <code>nodes</code> and <code>edges</code> enables the user to see clearly what streets are connected to other clearly. The representation of this in Network Analysis terms will look like the image at the bottom. Before we start these kinds of visualization, let’s learn a thing or two about creating a network structure in RStudio.
+</p>
+<p></br></p>
+<center>
+<img src="Image1_2.png" title="fig:" height="600" alt="“/Volumes/Anwar-HHD/GEOG0114/Computer Labs/Week 10/GEOG0114-PSA-WK10”" />
+</center>
+<a href="https://uclpg-msc-sgds.github.io/GEOG0114-PSA-WK10/network_analysis.html"><strong>&gt;&gt; Next Section &gt;&gt;</strong></a>
+<hr style="border:2px solid gray">
+</hr>
 </div>
 
 
