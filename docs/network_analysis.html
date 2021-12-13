@@ -341,13 +341,13 @@ g1 &lt;- graph(edges=c(&quot;S00002&quot;,&quot;S00011&quot;,  &quot;S00002&quot
 
 # view the text output 
 g1</code></pre>
-<pre><code>## IGRAPH 2f3dff2 UN-- 4 3 -- 
+<pre><code>## IGRAPH c85c8df UN-- 4 3 -- 
 ## + attr: name (v/c)
-## + edges from 2f3dff2 (vertex names):
+## + edges from c85c8df (vertex names):
 ## [1] S00002--S00011 S00002--S00012 S00002--S01111</code></pre>
 <pre class="r"><code># view network structure 
 plot(g1, main = &quot;Simple example with S00002&quot;)</code></pre>
-<p><img src="network_analysis_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="network_analysis_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>Let’s build upon this structure focusing street <code>S00012</code> and its connections to other roads in the network. When you filter this street segment in the data viewer, you will see its linked to the following:</p>
 <ul>
 <li><code>S00002 -&gt; S00012</code> *</li>
@@ -372,25 +372,25 @@ g2 &lt;- graph(edges=c(&quot;S00002&quot;,&quot;S00011&quot;,  &quot;S00002&quot
 
 # view the text output 
 g2</code></pre>
-<pre><code>## IGRAPH 866ddc1 UN-- 7 7 -- 
+<pre><code>## IGRAPH 08dc90e UN-- 7 7 -- 
 ## + attr: name (v/c)
-## + edges from 866ddc1 (vertex names):
+## + edges from 08dc90e (vertex names):
 ## [1] S00002--S00011 S00002--S00012 S00002--S01111 S00011--S00012 S00012--S00013 S00012--S00014 S00012--S00017</code></pre>
 <pre class="r"><code># view network structure 
 plot(g2, main = &quot;Expanded example with S00002 and S00012&quot;)</code></pre>
-<p><img src="network_analysis_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
-<p>You catch drift in terms of knowing how to build a network structure. Suppose if you were to include the connections from other nodes such as <code>S00011</code> (see by filter) you have to expand the network further to include the 11 other connections. Now, imagine doing this for all 81 street segments - the tasks of data entry because incredibly arduous. Of course, this tutorial will spare you from that pain.</p>
+<p><img src="network_analysis_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>You catch the drift in terms of knowing how to build a network structure. Suppose if you were to include the connections from other nodes such as <code>S00011</code> (see by filter) you have to expand the network further to include the 11 other connections. Now, imagine doing this for all 81 street segments - the tasks of data entry because incredibly arduous. Of course, this tutorial will spare you from that pain.</p>
 </div>
-<div id="accessing-edge-node-and-network-attributes" class="section level2">
-<h2><strong>2.1. Accessing edge, node and network attributes</strong></h2>
+<div id="accessing-and-adding-edge-node-and-network-attributes" class="section level2">
+<h2><strong>2.2. Accessing and adding edge, node and network attributes</strong></h2>
 <p>The objects <code>g1</code> and <code>g2</code> are network object created from the <code>igraph</code> package. You can see details of the object with quick functions such <code>E()</code>, <code>V()</code> and <code>NetworkObjectName[]</code>. Here, is an example:</p>
 <pre class="r"><code># The edges of the g2
 E(g2)</code></pre>
-<pre><code>## + 7/7 edges from 866ddc1 (vertex names):
+<pre><code>## + 7/7 edges from 08dc90e (vertex names):
 ## [1] S00002--S00011 S00002--S00012 S00002--S01111 S00011--S00012 S00012--S00013 S00012--S00014 S00012--S00017</code></pre>
 <pre class="r"><code># The list of nodes forming g2
 V(g2)</code></pre>
-<pre><code>## + 7/7 vertices, named, from 866ddc1:
+<pre><code>## + 7/7 vertices, named, from 08dc90e:
 ## [1] S00002 S00011 S00012 S01111 S00013 S00014 S00017</code></pre>
 <pre class="r"><code># You can examine the network matrix directly, which is more intuitive read for connections 
 g2[]</code></pre>
@@ -471,7 +471,112 @@ edge_attr(g2)</code></pre>
 ## [1] &quot;#ffeda0&quot; &quot;#fee0d2&quot; &quot;#fee0d2&quot; &quot;#e5f5e0&quot; &quot;#fee0d2&quot; &quot;#fee0d2&quot; &quot;#e5f5e0&quot;</code></pre>
 <pre class="r"><code># see output
 plot(g2)</code></pre>
-<p><img src="network_analysis_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="network_analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="handling-large-network-data-and-deriving-measures-of-accessibility" class="section level2">
+<h2><strong>2.3. Handling large network data and deriving measures of accessibility</strong></h2>
+<p>Now, that we got the introductory stuff out of the way. Lets go back to the dataset we loaded early <code>nodes</code> and <code>edges</code> - these comprise of 81 street segments forming 203 edges (including redundant edges). We are going to bring the two datasets to create a network object data frame using <code>graph_from_data_frame()</code> function.</p>
+<pre class="r"><code># create the network structure using the edges and nodes dataset we loaded at the start
+network.structure &lt;- graph_from_data_frame(d = edges, vertices = nodes, directed = F)
+# you can examine the structure as a matrix to see the connections
+net.as.matrix &lt;- as.matrix(network.structure[])</code></pre>
+<p>Here is the full-on visualization of the street network shown earlier:</p>
+<pre class="r"><code># see output
+plot(network.structure, layout = layout_with_kk, vertex.color=&quot;white&quot;, vertex.frame.color=&quot;white&quot;, vertex.size=2, vertex.label.color=&quot;black&quot;, vertex.label.cex = 0.7, vertex.label.font= 2, edge.curved = 0, edge.color=&quot;lightgrey&quot;, edge.width=2, main = &quot;Plain Network Structure of Street Data&quot;)</code></pre>
+<p><img src="network_analysis_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>You can visualize the output simply by changing the options in the <code>layout =</code> argument. There are several such as:</p>
+<ul>
+<li><code>layout_randomly</code></li>
+<li><code>layout_in_circle</code></li>
+<li><code>layout_with_fr</code></li>
+<li><code>layout_with_kk</code></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+</ul>
+<p>However, the most popular approach for visualizing network structures is the Kamada Kawai alogrithm, which is <code>layout_with_kk</code> (used in the above code).</p>
+<p>Let extract the following network measures (or alternatively accessibility):</p>
+<p class="comment">
+<strong>KEY DEFINITIONS</strong> </br> </br> <strong>Connectivity</strong>: In this context, this simply refers to the number streets connected to a given street. </br> </br> <strong>Closeness centrality</strong>: This refers to the average length of the shortest path between one street and all other street segments in the network. In this context, street segments with higher values for closeness centrality indicates higher levels of accessibility. </br> </br> <strong>Betweeness centrality</strong>: This refers to the degree of how a given street segment serves as a bridge to other streets within a given network. In other words, the greater the levels of betweeness centrality indicates higher levels of permeability.
+</p>
+<p>To extract the values for a given segment use the following functions:</p>
+<ul>
+<li>For connectivity: use <code>degree()</code></li>
+<li>For Closeness centrality (i.e., accessibility): use <code>closeness()</code></li>
+<li>For Betweeness centrality (i.e., permeability): use <code>betweenness()</code></li>
+</ul>
+<pre class="r"><code>nodes$connectivity &lt;- degree(network.structure, mode=&quot;in&quot;)
+nodes$betweeness &lt;- betweenness(network.structure, directed=F, weights=NA)
+nodes$closeness &lt;- closeness(network.structure, vids = V(network.structure))
+
+# create 5 break categories 
+betweenessCat &lt;- getJenksBreaks(nodes$betweeness, 5)
+closenessCat &lt;- getJenksBreaks(nodes$closeness, 5)
+
+head(nodes)</code></pre>
+<pre><code>##    index indexID connectivity betweeness   closeness
+## 1 S00001       1            1    0.00000 0.003184713
+## 2 S00002       2            5  148.87817 0.003508772
+## 3 S00003       3            2   44.21067 0.003389831
+## 4 S00004       4            3   29.09784 0.003257329
+## 5 S00005       5            5   23.16811 0.002873563
+## 6 S00006       6            1    0.00000 0.002364066</code></pre>
+<p>Visualize network measures back on to street map:</p>
+<pre class="r"><code># merge data
+segments &lt;- merge(segments, nodes, by.x = &quot;StreetCode&quot;, by.y=&quot;index&quot;)
+# generate betweeness as categorical variable (much easier and cleaner to visualize)
+segments$betwCat[segments$betweeness&gt;=0 &amp; segments$betweeness&lt;130.5937] &lt;-1
+segments$betwCat[segments$betweeness&gt;=130.5937 &amp; segments$betweeness&lt;333.0261] &lt;-2
+segments$betwCat[segments$betweeness&gt;=333.0261 &amp; segments$betweeness&lt;739.3655] &lt;-3
+segments$betwCat[segments$betweeness&gt;=739.3655 &amp; segments$betweeness&lt;933.1906] &lt;-4
+
+# plot map of image for betweeness
+tm_shape(segments) + 
+    tm_lines(col=&quot;betwCat&quot;, style=&quot;cat&quot;, labels = c(&quot;Low&quot;, &quot;Med&quot;, &quot;High&quot;,&quot;V.High&quot;), title.col=&quot;Permeability&quot;) + 
+    tm_text(&quot;StreetCode&quot;, size = 0.5, along.lines = TRUE) +
+    tm_shape(points) + tm_dots(size = 0.05, col = &quot;black&quot;, alpha = 0.3) +
+    tm_shape(burglaries) + tm_dots(size = 0.05, col = &quot;red&quot;) +
+    tm_layout(frame = TRUE, legend.outside = TRUE, legend.title.size = 0.8, legend.text.size = 0.6) +
+    tm_compass(type = &quot;arrow&quot;, position = c(&quot;right&quot;, &quot;top&quot;)) +
+    tm_scale_bar(position = c(&quot;right&quot;, &quot;bottom&quot;)</code></pre>
+<center>
+<img src="Image2_1.png" title="fig:" height="600" alt="“/Volumes/Anwar-HHD/GEOG0114/Computer Labs/Week 10/GEOG0114-PSA-WK10”" />
+</center>
+<pre class="r"><code># generate closeness as categorical variable (much easier and cleaner to visualize)
+segments$ClosCat[segments$closeness &gt;=0 &amp; segments$closeness &lt;0.002590674] &lt;-1
+segments$ClosCat[segments$closeness &gt;=0.002590674 &amp; segments$closeness &lt;0.003125000] &lt;-2
+segments$ClosCat[segments$closeness &gt;=0.003125000 &amp; segments$closeness &lt;0.003649635] &lt;-3
+segments$ClosCat[segments$closeness &gt;=0.003649635 &amp; segments$closeness &lt;0.0046] &lt;-4
+
+# plot map of image for closeness
+tm_shape(segments) + 
+    tm_lines(col=&quot;ClosCat&quot;, style=&quot;cat&quot;, labels = c(&quot;Low&quot;, &quot;Med&quot;, &quot;High&quot;,&quot;V.High&quot;), title.col=&quot;Accessibility&quot;) + 
+    tm_text(&quot;StreetCode&quot;, size = 0.5, along.lines = TRUE) +
+    tm_shape(points) + tm_dots(size = 0.05, col = &quot;black&quot;, alpha = 0.3) +
+    tm_shape(burglaries) + tm_dots(size = 0.05, col = &quot;red&quot;) +
+    tm_layout(frame = TRUE, legend.outside = TRUE, legend.title.size = 0.8, legend.text.size = 0.6) +
+    tm_compass(type = &quot;arrow&quot;, position = c(&quot;right&quot;, &quot;top&quot;)) +
+    tm_scale_bar(position = c(&quot;right&quot;, &quot;bottom&quot;))</code></pre>
+<center>
+<img src="Image2_2.png" title="fig:" height="600" alt="“/Volumes/Anwar-HHD/GEOG0114/Computer Labs/Week 10/GEOG0114-PSA-WK10”" />
+</center>
+<pre class="r"><code># plot map of image for connectivity
+tm_shape(segments) + 
+    tm_lines(col=&quot;connectivity&quot;, style=&quot;cont&quot;, palette = &quot;Reds&quot;, title.col=&quot;Connectivity&quot;) + 
+    tm_text(&quot;StreetCode&quot;, size = 0.5, along.lines = TRUE) +
+    tm_shape(points) + tm_dots(size = 0.05, col = &quot;black&quot;, alpha = 0.3) +
+    tm_shape(burglaries) + tm_dots(size = 0.05, col = &quot;red&quot;) +
+    tm_layout(frame = TRUE, legend.outside = TRUE, legend.title.size = 0.8, legend.text.size = 0.6) +
+    tm_compass(type = &quot;arrow&quot;, position = c(&quot;right&quot;, &quot;top&quot;)) +
+    tm_scale_bar(position = c(&quot;right&quot;, &quot;bottom&quot;))</code></pre>
+<center>
+<img src="Image2_3.png" title="fig:" height="600" alt="“/Volumes/Anwar-HHD/GEOG0114/Computer Labs/Week 10/GEOG0114-PSA-WK10”" />
+</center>
+<p>This is how network analysis is integrated to get accessibility metrics. Let see how we use such measure to predict the risk of burglaries overall.</p>
+<a href="https://uclpg-msc-sgds.github.io/GEOG0114-PSA-WK10/applications_to_crime.html"><strong>&gt;&gt; Next Section &gt;&gt;</strong></a>
+<hr style="border:2px solid gray">
+</hr>
 </div>
 
 
