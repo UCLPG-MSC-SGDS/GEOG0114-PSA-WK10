@@ -317,7 +317,161 @@ pre code, pre, code {
 </hr>
 <div id="how-to-create-networks-in-rstudio-using-igraph" class="section level2">
 <h2><strong>2.1. How to create networks in RStudio using igraph</strong></h2>
-<p>Creating networks in RStudio are very easy. Suppose in 2016, you traveled to many countries, and from those destinations</p>
+<p>Creating networks in RStudio are very easy. Let take the street segment <code>S00002</code> as an example, you will notice that its connected to 3 other streets <code>S00011</code>, <code>S00012</code> and <code>S01111</code>.</p>
+<p><code>S00002</code>, <code>S00011</code>, <code>S00012</code> and <code>S01111</code>.are streets which are referred to as <strong>nodes</strong></p>
+<p>We know the following things about <code>S00002</code> if will filter this observed value in R’s data viewer. We see the following:</p>
+<ul>
+<li><code>S00002 -&gt; S00011</code></li>
+<li><code>S00002 -&gt; S00012</code></li>
+<li><code>S00011 -&gt; S00002</code></li>
+<li><code>S00012 -&gt; S00002</code></li>
+<li><code>S01111 -&gt; S00002</code></li>
+</ul>
+<p>These are all the connections <code>S00002</code> has in that data frame. Note, that <code>S00002 -&gt; S00011</code> &amp; <code>S00011 -&gt; S00002</code> as well as <code>S00002 -&gt; S00012</code> &amp; <code>S00012 -&gt; S00002</code> are essentially the same and therefore one becomes redundant in that list. Hence, the list is reduced to:</p>
+<ul>
+<li><code>S00002 -&gt; S00011</code></li>
+<li><code>S00002 -&gt; S00012</code></li>
+<li><code>S01111 -&gt; S00002</code></li>
+</ul>
+<p>The above connections listed (or street segment intersecting with each other) are referred to as <strong>edges</strong>. We can generate the above and form a simple network using the <code>graph()</code> function from the <code>igraph</code> package. In this function, we provide the list of edges in the <code>graph()</code> function.</p>
+<p>Here, you list the connections in the <code>edges</code> argument and say its an undirected network by declaring <code>FALSE</code></p>
+<p>Here’s an example:</p>
+<pre class="r"><code># create network structure for the four street segments
+g1 &lt;- graph(edges=c(&quot;S00002&quot;,&quot;S00011&quot;,  &quot;S00002&quot;,&quot;S00012&quot;,  &quot;S01111&quot;,&quot;S00002&quot;), directed = FALSE)
+
+# view the text output 
+g1</code></pre>
+<pre><code>## IGRAPH 2f3dff2 UN-- 4 3 -- 
+## + attr: name (v/c)
+## + edges from 2f3dff2 (vertex names):
+## [1] S00002--S00011 S00002--S00012 S00002--S01111</code></pre>
+<pre class="r"><code># view network structure 
+plot(g1, main = &quot;Simple example with S00002&quot;)</code></pre>
+<p><img src="network_analysis_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>Let’s build upon this structure focusing street <code>S00012</code> and its connections to other roads in the network. When you filter this street segment in the data viewer, you will see its linked to the following:</p>
+<ul>
+<li><code>S00002 -&gt; S00012</code> *</li>
+<li><code>S00011 -&gt; S00012</code> **</li>
+<li><code>S00012 -&gt; S00002</code> *</li>
+<li><code>S00012 -&gt; S00011</code> **</li>
+<li><code>S00012 -&gt; S00013</code></li>
+<li><code>S00012 -&gt; S00014</code></li>
+<li><code>S00017 -&gt; S00012</code></li>
+</ul>
+<p>We have already establish this connection: <code>S00002 -&gt; S00012</code>, and one of these <code>S00011 -&gt; S00012</code> or <code>S00012 -&gt; S00011</code>are redundant. Therefore, the list is reduced to:</p>
+<ul>
+<li><code>S00012 -&gt; S00011</code></li>
+<li><code>S00012 -&gt; S00013</code></li>
+<li><code>S00012 -&gt; S00014</code></li>
+<li><code>S00017 -&gt; S00012</code></li>
+</ul>
+<p>We can expand this current network defined in <code>g1</code> with the information for <code>S00012</code>. The code will look as follows:</p>
+<pre class="r"><code># create network structure for the four street segments
+g2 &lt;- graph(edges=c(&quot;S00002&quot;,&quot;S00011&quot;,  &quot;S00002&quot;,&quot;S00012&quot;,  &quot;S01111&quot;,&quot;S00002&quot;,
+&quot;S00012&quot;,&quot;S00011&quot;,  &quot;S00012&quot;,&quot;S00013&quot;,  &quot;S00012&quot;,&quot;S00014&quot;,  &quot;S00017&quot;,&quot;S00012&quot;), directed = FALSE)
+
+# view the text output 
+g2</code></pre>
+<pre><code>## IGRAPH 866ddc1 UN-- 7 7 -- 
+## + attr: name (v/c)
+## + edges from 866ddc1 (vertex names):
+## [1] S00002--S00011 S00002--S00012 S00002--S01111 S00011--S00012 S00012--S00013 S00012--S00014 S00012--S00017</code></pre>
+<pre class="r"><code># view network structure 
+plot(g2, main = &quot;Expanded example with S00002 and S00012&quot;)</code></pre>
+<p><img src="network_analysis_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>You catch drift in terms of knowing how to build a network structure. Suppose if you were to include the connections from other nodes such as <code>S00011</code> (see by filter) you have to expand the network further to include the 11 other connections. Now, imagine doing this for all 81 street segments - the tasks of data entry because incredibly arduous. Of course, this tutorial will spare you from that pain.</p>
+</div>
+<div id="accessing-edge-node-and-network-attributes" class="section level2">
+<h2><strong>2.1. Accessing edge, node and network attributes</strong></h2>
+<p>The objects <code>g1</code> and <code>g2</code> are network object created from the <code>igraph</code> package. You can see details of the object with quick functions such <code>E()</code>, <code>V()</code> and <code>NetworkObjectName[]</code>. Here, is an example:</p>
+<pre class="r"><code># The edges of the g2
+E(g2)</code></pre>
+<pre><code>## + 7/7 edges from 866ddc1 (vertex names):
+## [1] S00002--S00011 S00002--S00012 S00002--S01111 S00011--S00012 S00012--S00013 S00012--S00014 S00012--S00017</code></pre>
+<pre class="r"><code># The list of nodes forming g2
+V(g2)</code></pre>
+<pre><code>## + 7/7 vertices, named, from 866ddc1:
+## [1] S00002 S00011 S00012 S01111 S00013 S00014 S00017</code></pre>
+<pre class="r"><code># You can examine the network matrix directly, which is more intuitive read for connections 
+g2[]</code></pre>
+<pre><code>## 7 x 7 sparse Matrix of class &quot;dgCMatrix&quot;
+##        S00002 S00011 S00012 S01111 S00013 S00014 S00017
+## S00002      .      1      1      1      .      .      .
+## S00011      1      .      1      .      .      .      .
+## S00012      1      1      .      .      1      1      1
+## S01111      1      .      .      .      .      .      .
+## S00013      .      .      1      .      .      .      .
+## S00014      .      .      1      .      .      .      .
+## S00017      .      .      1      .      .      .      .</code></pre>
+</br>
+<p class="comment">
+<strong>NOTE</strong>: The network matrix is akin to a neighbourhood matrix (or adjacency matrix). It also tells the use the which items are linked when a cell is 1.
+</p>
+<p></br></p>
+<p>We can add descriptive information about the <code>S00002</code>, <code>S00011</code>, <code>S00012</code>, <code>S01111</code>, <code>S00013</code>, <code>S00014</code> &amp; <code>S00017</code>. We have details concerning distance (m), socioeconomic status and burglaries. Information can be entered into the network structure as follows:</p>
+<pre class="r"><code># enter data on crime and socioeconomic status into the nodes
+V(g2)$Burglary &lt;- c(1.72, 3.51, 2.12, 2.95, 1.48, 1.48, 2.27)
+V(g2)$Socioeco &lt;- c(&quot;Med&quot;, &quot;Low&quot;, &quot;Low&quot;, &quot;High&quot;, &quot;Low&quot;, &quot;Low&quot;, &quot;High&quot;)
+
+# usually the distance are entered into the edges and used for weights
+E(g2)$Distance &lt;- c(384.07, 368.37, 119.79, 684.84, 202.30, 164.72, 370.88)
+
+# You can examine the attribute accordingly edge_attr() and vertex_attr()
+edge_attr(g2)</code></pre>
+<pre><code>## $Distance
+## [1] 384.07 368.37 119.79 684.84 202.30 164.72 370.88</code></pre>
+<pre class="r"><code>vertex_attr(g2)</code></pre>
+<pre><code>## $name
+## [1] &quot;S00002&quot; &quot;S00011&quot; &quot;S00012&quot; &quot;S01111&quot; &quot;S00013&quot; &quot;S00014&quot; &quot;S00017&quot;
+## 
+## $Burglary
+## [1] 1.72 3.51 2.12 2.95 1.48 1.48 2.27
+## 
+## $Socioeco
+## [1] &quot;Med&quot;  &quot;Low&quot;  &quot;Low&quot;  &quot;High&quot; &quot;Low&quot;  &quot;Low&quot;  &quot;High&quot;</code></pre>
+<p>We can play with the information and visualize it as well. But, we’ll need to carry out some cleaning first. Here, we’ll illustrate how to perform this on a this small set of data. We are going to do the following:</p>
+<ul>
+<li>Weight the edges’ width using the distance (re-scaled by dividing by 100)</li>
+<li>Classify the nodes according to type of socioeconomic status with colors</li>
+<li>Weight the nodes using the burglary rates (re-scaled by multiplying by 10)</li>
+</ul>
+<pre class="r"><code>#  Affect the edges width using E()$width
+E(g2)$width &lt;- (E(g2)$Distance)/100
+
+# Affect the size of nodes so that they are weighted by Burglary rates times by 10 with V()$size
+V(g2)$size &lt;- V(g2)$Burglary*10
+
+# Categorize the nodes according to type of socioeconomic status with V()$color using 
+V(g2)$color &lt;- NA
+V(g2)$color[V(g2)$Socioeco %in% &quot;Low&quot;] &lt;- &quot;#fee0d2&quot;  # red
+V(g2)$color[V(g2)$Socioeco %in% &quot;Med&quot;] &lt;- &quot;#ffeda0&quot;  # yellow
+V(g2)$color[V(g2)$Socioeco %in% &quot;High&quot;] &lt;- &quot;#e5f5e0&quot; # green
+
+# check new attributes added to network object
+edge_attr(g2)</code></pre>
+<pre><code>## $Distance
+## [1] 384.07 368.37 119.79 684.84 202.30 164.72 370.88
+## 
+## $width
+## [1] 3.8407 3.6837 1.1979 6.8484 2.0230 1.6472 3.7088</code></pre>
+<pre class="r"><code>vertex_attr(g2)</code></pre>
+<pre><code>## $name
+## [1] &quot;S00002&quot; &quot;S00011&quot; &quot;S00012&quot; &quot;S01111&quot; &quot;S00013&quot; &quot;S00014&quot; &quot;S00017&quot;
+## 
+## $Burglary
+## [1] 1.72 3.51 2.12 2.95 1.48 1.48 2.27
+## 
+## $Socioeco
+## [1] &quot;Med&quot;  &quot;Low&quot;  &quot;Low&quot;  &quot;High&quot; &quot;Low&quot;  &quot;Low&quot;  &quot;High&quot;
+## 
+## $size
+## [1] 17.2 35.1 21.2 29.5 14.8 14.8 22.7
+## 
+## $color
+## [1] &quot;#ffeda0&quot; &quot;#fee0d2&quot; &quot;#fee0d2&quot; &quot;#e5f5e0&quot; &quot;#fee0d2&quot; &quot;#fee0d2&quot; &quot;#e5f5e0&quot;</code></pre>
+<pre class="r"><code># see output
+plot(g2)</code></pre>
+<p><img src="network_analysis_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
 
 
