@@ -245,13 +245,10 @@ $(document).ready(function () {
   <a href="index.html">1. Getting Started</a>
 </li>
 <li>
-  <a href="network_analysis.html">2. Obtaining Accessibility Measurements</a>
+  <a href="network_analysis.html">2. Network Analysis &amp; Mapping</a>
 </li>
 <li>
-  <a href="applications_to_crime.html">3. Street Network Analysis in Crime</a>
-</li>
-<li>
-  <a href="recommendations.html">4. Recommended Readings</a>
+  <a href="recommendations.html">3. Recommended Readings</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -429,7 +426,7 @@ edge_attr(g2)</code></pre>
 ## 
 ## $Socioeco
 ## [1] &quot;Med&quot;  &quot;Low&quot;  &quot;Low&quot;  &quot;High&quot; &quot;Low&quot;  &quot;Low&quot;  &quot;High&quot;</code></pre>
-<p>We can play with the information and visualize it as well. But, we’ll need to carry out some cleaning first. Here, we’ll illustrate how to perform this on a this small set of data. We are going to do the following:</p>
+<p>We can play with the information and visualize it as well. But, we’ll need to carry out some cleaning first. Here, we’ll illustrate crudely how to perform this on a this small set of data. We are going to do the following:</p>
 <ul>
 <li>Weight the edges’ width using the distance (re-scaled by dividing by 100)</li>
 <li>Classify the nodes according to type of socioeconomic status with colors</li>
@@ -490,10 +487,9 @@ plot(network.structure, layout = layout_with_kk, vertex.color=&quot;white&quot;,
 <li><code>layout_in_circle</code></li>
 <li><code>layout_with_fr</code></li>
 <li><code>layout_with_kk</code></li>
-<li></li>
-<li></li>
-<li></li>
-<li></li>
+<li><code>layout_as_tree</code></li>
+<li><code>layout_on_grid</code></li>
+<li><code>layout_as_star</code></li>
 </ul>
 <p>However, the most popular approach for visualizing network structures is the Kamada Kawai alogrithm, which is <code>layout_with_kk</code> (used in the above code).</p>
 <p>Let extract the following network measures (or alternatively accessibility):</p>
@@ -536,7 +532,6 @@ tm_shape(segments) +
     tm_lines(col=&quot;betwCat&quot;, style=&quot;cat&quot;, labels = c(&quot;Low&quot;, &quot;Med&quot;, &quot;High&quot;,&quot;V.High&quot;), title.col=&quot;Permeability&quot;) + 
     tm_text(&quot;StreetCode&quot;, size = 0.5, along.lines = TRUE) +
     tm_shape(points) + tm_dots(size = 0.05, col = &quot;black&quot;, alpha = 0.3) +
-    tm_shape(burglaries) + tm_dots(size = 0.05, col = &quot;red&quot;) +
     tm_layout(frame = TRUE, legend.outside = TRUE, legend.title.size = 0.8, legend.text.size = 0.6) +
     tm_compass(type = &quot;arrow&quot;, position = c(&quot;right&quot;, &quot;top&quot;)) +
     tm_scale_bar(position = c(&quot;right&quot;, &quot;bottom&quot;)</code></pre>
@@ -554,7 +549,6 @@ tm_shape(segments) +
     tm_lines(col=&quot;ClosCat&quot;, style=&quot;cat&quot;, labels = c(&quot;Low&quot;, &quot;Med&quot;, &quot;High&quot;,&quot;V.High&quot;), title.col=&quot;Accessibility&quot;) + 
     tm_text(&quot;StreetCode&quot;, size = 0.5, along.lines = TRUE) +
     tm_shape(points) + tm_dots(size = 0.05, col = &quot;black&quot;, alpha = 0.3) +
-    tm_shape(burglaries) + tm_dots(size = 0.05, col = &quot;red&quot;) +
     tm_layout(frame = TRUE, legend.outside = TRUE, legend.title.size = 0.8, legend.text.size = 0.6) +
     tm_compass(type = &quot;arrow&quot;, position = c(&quot;right&quot;, &quot;top&quot;)) +
     tm_scale_bar(position = c(&quot;right&quot;, &quot;bottom&quot;))</code></pre>
@@ -566,15 +560,13 @@ tm_shape(segments) +
     tm_lines(col=&quot;connectivity&quot;, style=&quot;cont&quot;, palette = &quot;Reds&quot;, title.col=&quot;Connectivity&quot;) + 
     tm_text(&quot;StreetCode&quot;, size = 0.5, along.lines = TRUE) +
     tm_shape(points) + tm_dots(size = 0.05, col = &quot;black&quot;, alpha = 0.3) +
-    tm_shape(burglaries) + tm_dots(size = 0.05, col = &quot;red&quot;) +
     tm_layout(frame = TRUE, legend.outside = TRUE, legend.title.size = 0.8, legend.text.size = 0.6) +
     tm_compass(type = &quot;arrow&quot;, position = c(&quot;right&quot;, &quot;top&quot;)) +
     tm_scale_bar(position = c(&quot;right&quot;, &quot;bottom&quot;))</code></pre>
 <center>
 <img src="Image2_3.png" title="fig:" height="600" alt="“/Volumes/Anwar-HHD/GEOG0114/Computer Labs/Week 10/GEOG0114-PSA-WK10”" />
 </center>
-<p>This is how network analysis is integrated to get accessibility metrics. Let see how we use such measure to predict the risk of burglaries overall.</p>
-<a href="https://uclpg-msc-sgds.github.io/GEOG0114-PSA-WK10/applications_to_crime.html"><strong>&gt;&gt; Next Section &gt;&gt;</strong></a>
+<a href="https://uclpg-msc-sgds.github.io/GEOG0114-PSA-WK10/recommendations.html"><strong>&gt;&gt; Next Section &gt;&gt;</strong></a>
 <hr style="border:2px solid gray">
 </hr>
 </div>
